@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import time, sys, getopt
+import time, sys, getopt, logging
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
 
 from web3 import Web3, HTTPProvider
 from ens import ENS
+
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 # Remove 1st argument from the
 # list of command line arguments
@@ -51,7 +53,7 @@ class MyServer(BaseHTTPRequestHandler):
         domain = parse_qs(urlparse(self.path).query).get('domain', None)
         if domain is not None:
           if domain[0].endswith(baseDom):
-            addr = w3.ens.address(domain[0].replace(baseDom, '') + ".eth")
+            addr = w3.ens.resolver(name=domain[0].replace(baseDom, '') + ".eth")
             print (addr)
           else:
             addr = None

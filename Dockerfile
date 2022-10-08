@@ -10,4 +10,4 @@ COPY app.py .
 USER nobody
 EXPOSE 80
 
-ENTRYPOINT ["python3", "./app.py"]
+ENTRYPOINT ["python3", "-u", "./app.py"]
