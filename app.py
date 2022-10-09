@@ -53,7 +53,7 @@ class MyServer(BaseHTTPRequestHandler):
         domain = parse_qs(urlparse(self.path).query).get('domain', None)
         if domain is not None:
           if domain[0].endswith(baseDom):
-            addr = w3.ens.resolver(domain[0].replace(baseDom, '') + ".eth")
+            addr = w3.ens.address(domain[0].replace(baseDom, '') + ".eth")
             print (addr)
           else:
             addr = None
