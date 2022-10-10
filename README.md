@@ -1,7 +1,7 @@
 # Utility to answer/check for valid ens addresses used by caddy ask
 
 runs on :80 
-its intended to run on a domain. so add your root domain in -b .example.com  so when a request comes for ensdomain.example.com example.com will be stripped and provider will be queried if ensdomain.eth exists. If it does it Returns 200 OK and caddy will resume with cert request.
+its intended to run on a domain. so add your root domain in -b .example.com  so when a request comes for ensdomain.example.com example.com will be stripped and provider will be queried if ensdomain.eth exists. If it does it Returns 200 OK and caddy will resume with cert request. If you add beeurl it will also check a bee if the content domain is maybe a valid CID.
 
 ## usage:
 ```
@@ -19,7 +19,7 @@ darkobas/enschecker:latest
 
 ## docker usage:
 ```
-command: -b .my.link.domain -p https://myrpc.provider/
+command: -b .my.link.domain -p https://myrpc.provider/ -u https://somebee/bzz/
 ```
 
 ## caddy usage:

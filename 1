@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import time, sys, getopt, logging
+import time, sys, getopt, logging, requests
 from codecs import decode
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
-import requests
 
 from web3 import Web3, HTTPProvider
 from ens import ENS
@@ -42,6 +41,22 @@ ns = ENS(w3)
 hostName = "0.0.0.0"
 serverPort = 80
 
+def url_checker(url):
+    try:
+        #Get Url
+        print ("url ", url)
+        get = requests.get(url)
+        # if the request succeeds
+        if get.status_code == 200:
+            return(f"{url}: is reachable")
+        else:
+            return(None)
+
+    #Exception
+    except requests.exceptions.RequestException as e:
+        # print URL with Errs
+        raise SystemExit(f"{url}: is Not reachable \nErr: {e}")
+
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed_path = urlparse(self.path)
@@ -53,14 +68,14 @@ class MyServer(BaseHTTPRequestHandler):
           else:
             addr = None
 
-          if (addr == None) & (args.beeurl != ''):
-            page = requests.get(args.beeurl + domain[0].replace(args.basedomain, ''))
-            print ("page ", page.status_code)
-          if (addr != None) | (page.status_code == 200):
+          if (addr = None) && (args.beeurl != ''):
+            addr = url_checker(args.beeurl + domain[0].replace(args.basedomain, '')) 
+
+          if (addr != None):
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
-            self.wfile.write(bytes("OK", "utf-8"))
+            elf.wfile.write(bytes("OK", "utf-8"))
           else:
             self.send_response(403)
             self.send_header("Content-type", "text/html")
