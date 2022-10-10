@@ -16,9 +16,9 @@ import argparse
 parser = argparse.ArgumentParser()
 
 # Adding optional argument
-parser.add_argument("-b", "--basedomain", help = "base domain to remove from inquiry")
+parser.add_argument("-b", "--basedomain",type=str, help = "base domain to remove from inquiry")
 parser.add_argument("-u", "--beeurl", type=str, default='', help = "beeurl for checking cids")
-parser.add_argument("-p", "--provider", help = "rpc provider url")
+parser.add_argument("-p", "--provider", type=str, help = "rpc provider url")
 
 # Read arguments from command line
 args = parser.parse_args()
@@ -48,15 +48,16 @@ class MyServer(BaseHTTPRequestHandler):
         domain = parse_qs(urlparse(self.path).query).get('domain', None)
         if domain is not None:
           if domain[0].endswith(args.basedomain):
-            addr = w3.ens.address(domain[0].replace(args.basedomain, '') + ".eth")
-            print (addr)
+            short = domain[0].replace(args.basedomain, '')
+            addr = w3.ens.address(short + ".eth")
+            print ("address ", addr)
           else:
             addr = None
-
-          if (addr == None) & (args.beeurl != ''):
-            page = requests.get(args.beeurl + domain[0].replace(args.basedomain, ''))
-            print ("page ", page.status_code)
-          if (addr != None) | (page.status_code == 200):
+          if (addr == None):
+            r = requests.get(args.beeurl + short + "/")
+            status = r.status_code == requests.codes.ok
+            print ("CID ", status)
+          if (addr != None) or (status):
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
