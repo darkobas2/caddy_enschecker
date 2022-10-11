@@ -41,9 +41,10 @@ ns = ENS(w3)
 
 hostName = "0.0.0.0"
 serverPort = 80
-
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
+        global status
+        status = ''
         parsed_path = urlparse(self.path)
         domain = parse_qs(urlparse(self.path).query).get('domain', None)
         if domain is not None:
@@ -53,7 +54,7 @@ class MyServer(BaseHTTPRequestHandler):
             print ("address ", addr)
           else:
             addr = None
-          if (addr == None):
+          if ((addr == None) & (args.beeurl != '')):
             r = requests.get(args.beeurl + short + "/")
             status = r.status_code == requests.codes.ok
             print ("CID ", status)
