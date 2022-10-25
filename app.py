@@ -5,6 +5,7 @@ from codecs import decode
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
 import requests
+import os
 
 from web3 import Web3, HTTPProvider
 from ens import ENS
@@ -28,6 +29,7 @@ if args.basedomain:
     print ("basedomain: ", args.basedomain)
 
 if args.beeurl:
+    args.beeurl = os.path.join(args.beeurl, '')
     print ("beeurl: ", args.beeurl)
 
 if args.provider:
