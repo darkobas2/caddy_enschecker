@@ -9,7 +9,6 @@ import os
 
 from web3 import Web3, HTTPProvider
 from ens import ENS
-
 import argparse
 
 
@@ -38,7 +37,7 @@ if args.provider:
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 w3 = Web3(Web3.HTTPProvider(args.provider))
-ns = ENS(w3)
+ns = ENS.fromWeb3(w3)
 
 
 hostName = "0.0.0.0"
@@ -47,20 +46,23 @@ class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
         global status
         status = ''
+        addr = ''
         parsed_path = urlparse(self.path)
         domain = parse_qs(urlparse(self.path).query).get('domain', None)
         if domain is not None:
           if domain[0].endswith(args.basedomain):
             short = domain[0].replace(args.basedomain, '')
-            addr = w3.ens.address(short + ".eth")
-            print ("address ", addr)
-          else:
-            addr = None
+            try:
+                addr = ns.owner(short + ".eth")
+                if addr != '0x0000000000000000000000000000000000000000':
+                    print ("addr ", str(addr))
+            except:
+                print('Error, ens domain owner not found')
           if ((addr == None) & (args.beeurl != '')):
             r = requests.get(args.beeurl + short + "/")
             status = r.status_code == requests.codes.ok
             print ("CID ", status)
-          if (addr != None) or (status):
+          if (addr != '0x0000000000000000000000000000000000000000') or (status):
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
@@ -75,7 +77,6 @@ class MyServer(BaseHTTPRequestHandler):
           self.send_header("Content-type", "text/html")
           self.end_headers()
           self.wfile.write(bytes("Err", "utf-8"))
- 
 
 if __name__ == "__main__":
     webServer = HTTPServer((hostName, serverPort), MyServer)
