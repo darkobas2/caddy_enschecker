@@ -50,33 +50,36 @@ class MyServer(BaseHTTPRequestHandler):
         parsed_path = urlparse(self.path)
         domain = parse_qs(urlparse(self.path).query).get('domain', None)
         if domain is not None:
-          if domain[0].endswith(args.basedomain):
-            short = domain[0].replace(args.basedomain, '')
-            try:
-                addr = ns.owner(short + ".eth")
-                if addr != '0x0000000000000000000000000000000000000000':
-                    print ("addr ", str(addr))
-            except:
-                print('Error, ens domain owner not found')
-          if ((addr == None) & (args.beeurl != '')):
-            r = requests.get(args.beeurl + short + "/")
-            status = r.status_code == requests.codes.ok
-            print ("CID ", status)
-          if (addr != '0x0000000000000000000000000000000000000000') or (status):
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(bytes("OK", "utf-8"))
-          else:
-            self.send_response(403)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(bytes("None", "utf-8"))
-        else:
-          self.send_response(404)
-          self.send_header("Content-type", "text/html")
-          self.end_headers()
-          self.wfile.write(bytes("Err", "utf-8"))
+          with open(r"allowlist", 'r') as allowList:
+            content = allowList.read()
+            if str(domain[0]) in content:
+              if domain[0].endswith(args.basedomain):
+                short = domain[0].replace(args.basedomain, '')
+                try:
+                    addr = ns.owner(short + ".eth")
+                    if addr != '0x0000000000000000000000000000000000000000':
+                        print ("addr ", str(addr))
+                except:
+                    print('Error, ens domain owner not found')
+              if ((addr == None) & (args.beeurl != '')):
+                r = requests.get(args.beeurl + short + "/")
+                status = r.status_code == requests.codes.ok
+                print ("CID ", status)
+              if (addr != '0x0000000000000000000000000000000000000000') or (status):
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(bytes("OK", "utf-8"))
+              else:
+                self.send_response(403)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(bytes("None", "utf-8"))
+            else:
+              self.send_response(404)
+              self.send_header("Content-type", "text/html")
+              self.end_headers()
+              self.wfile.write(bytes("Err", "utf-8"))
 
 if __name__ == "__main__":
     webServer = HTTPServer((hostName, serverPort), MyServer)

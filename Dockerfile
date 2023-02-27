@@ -7,6 +7,7 @@ RUN python -m pip install --upgrade pip
 RUN pip3 install web3
 
 COPY app.py .
+COPY allowlist .
 USER nobody
 EXPOSE 80
 
