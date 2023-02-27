@@ -4,7 +4,7 @@ import time, sys, getopt, logging
 from codecs import decode
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
-import requests
+import requests,urllib
 import os
 
 from web3 import Web3, HTTPProvider
@@ -82,6 +82,7 @@ class MyServer(BaseHTTPRequestHandler):
               self.wfile.write(bytes("Err", "utf-8"))
 
 if __name__ == "__main__":
+    urllib.request.urlretrieve('https://raw.githubusercontent.com/darkobas2/caddy_enschecker/master/allowlist', 'allowlist')
     webServer = HTTPServer((hostName, serverPort), MyServer)
     print("Server started http://%s:%s" % (hostName, serverPort))
 
