@@ -4,6 +4,7 @@ import time, sys, getopt, logging
 from codecs import decode
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
+from threading import Timer
 import requests,urllib
 import os
 
@@ -81,8 +82,36 @@ class MyServer(BaseHTTPRequestHandler):
               self.end_headers()
               self.wfile.write(bytes("Err", "utf-8"))
 
-if __name__ == "__main__":
+class RepeatedTimer(object):
+    def __init__(self, interval, function, *args, **kwargs):
+        self._timer     = None
+        self.interval   = interval
+        self.function   = function
+        self.args       = args
+        self.kwargs     = kwargs
+        self.is_running = False
+        self.start()
+
+    def _run(self):
+        self.is_running = False
+        self.start()
+        self.function(*self.args, **self.kwargs)
+
+    def start(self):
+        if not self.is_running:
+            self._timer = Timer(self.interval, self._run)
+            self._timer.start()
+            self.is_running = True
+
+    def stop(self):
+        self._timer.cancel()
+        self.is_running = False
+
+def downloader():
     urllib.request.urlretrieve('https://raw.githubusercontent.com/darkobas2/caddy_enschecker/master/allowlist', 'allowlist')
+
+if __name__ == "__main__":
+    dl = RepeatedTimer(86400, downloader)
     webServer = HTTPServer((hostName, serverPort), MyServer)
     print("Server started http://%s:%s" % (hostName, serverPort))
 
@@ -90,6 +119,8 @@ if __name__ == "__main__":
         webServer.serve_forever()
     except KeyboardInterrupt:
         pass
+    finally:
+        dl.stop()
 
     webServer.server_close()
     print("Server stopped.")
