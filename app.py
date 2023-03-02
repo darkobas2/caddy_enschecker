@@ -42,6 +42,7 @@ w3 = Web3(Web3.HTTPProvider(args.provider))
 ns = ENS.fromWeb3(w3)
 
 
+
 hostName = "0.0.0.0"
 serverPort = 80
 class MyServer(BaseHTTPRequestHandler):
@@ -59,11 +60,14 @@ class MyServer(BaseHTTPRequestHandler):
               if domain[0].endswith(args.basedomain):
                 try:
                     addr = ns.owner(short + ".eth")
+                    print ("addr ", str(addr))
                     if addr != '0x0000000000000000000000000000000000000000':
                         print ("addr ", str(addr))
-                except:
-                    print('Error, ens domain owner not found')
-              if ((addr != '0x0000000000000000000000000000000000000000') and (args.beeurl != None)):
+                except BaseException as e:
+                    print('Error, ens domain owner not found', str(e))
+              print(type(args.beeurl))
+              if ((addr == '0x0000000000000000000000000000000000000000') and (args.beeurl != '')):
+                print('we are here ')
                 r = requests.get(args.beeurl + short + "/")
                 status = r.status_code == requests.codes.ok
                 print ("CID ", status)
