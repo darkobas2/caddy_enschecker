@@ -20,6 +20,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-b", "--basedomain",type=str, help = "base domain to remove from inquiry")
 parser.add_argument("-u", "--beeurl", type=str, default='', help = "beeurl for checking cids")
 parser.add_argument("-p", "--provider", type=str, help = "rpc provider url")
+parser.add_argument("-a", "--allow", action=argparse.BooleanOptionalAction, help="use allow list", required=False, default=False)
 
 # Read arguments from command line
 args = parser.parse_args()
@@ -47,22 +48,22 @@ class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
         global status
         status = ''
-        addr = ''
+        addr = '0x0000000000000000000000000000000000000000'
         parsed_path = urlparse(self.path)
         domain = parse_qs(urlparse(self.path).query).get('domain', None)
         if domain is not None:
           with open(r"allowlist", 'r') as allowList:
             content = allowList.read()
-            if str(domain[0]) in content:
+            short = domain[0].replace(args.basedomain, '')
+            if (short in content) or (args.allow is False):
               if domain[0].endswith(args.basedomain):
-                short = domain[0].replace(args.basedomain, '')
                 try:
                     addr = ns.owner(short + ".eth")
                     if addr != '0x0000000000000000000000000000000000000000':
                         print ("addr ", str(addr))
                 except:
                     print('Error, ens domain owner not found')
-              if ((addr == None) & (args.beeurl != '')):
+              if ((addr != '0x0000000000000000000000000000000000000000') and (args.beeurl != None)):
                 r = requests.get(args.beeurl + short + "/")
                 status = r.status_code == requests.codes.ok
                 print ("CID ", status)
