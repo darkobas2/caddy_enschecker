@@ -8,6 +8,7 @@ RUN pip3 install web3
 
 COPY app.py .
 COPY allowlist .
+RUN chown nobody allowlist
 USER nobody
 EXPOSE 80
 
